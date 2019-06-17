@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function useToggler(initialState) {
+export function useToggler(initialState) {
   const [state, setState] = useState(initialState);
 
   const setTrue = () => setState(true);

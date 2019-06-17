@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import useFetch from "fetch-suspense";
 import { makeStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 import AppBar from "@material-ui/core/AppBar";
@@ -12,8 +11,10 @@ import List from "@material-ui/core/List";
 
 import { formatEvents } from "../helpers/functions";
 import { backendUrl } from "../data/constants";
+import { useToggler } from "../helpers/hooks";
 import EventCard from "../components/EventCard";
 import FeaturedEventCard from "../components/FeaturedEventCard";
+import CreateEventDialog from "./CreateEventDialog";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -22,9 +23,6 @@ const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1
   },
-  gridContainer: {
-    padding: 16
-  },
   loadingIndicator: {
     flex: 1
   },
@@ -32,6 +30,26 @@ const useStyles = makeStyles(theme => ({
     position: "fixed",
     right: 16,
     bottom: 16
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "3fr 1fr",
+    gridGap: "16px",
+    padding: 16,
+    [theme.breakpoints.down("md")]: {
+      gridTemplateColumns: "1fr"
+    }
+  },
+  eventGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gridGap: "16px",
+    [theme.breakpoints.only("xs")]: {
+      gridTemplateColumns: "1fr"
+    },
+    [theme.breakpoints.only("sm")]: {
+      gridTemplateColumns: "1fr 1fr"
+    }
   }
 }));
 
@@ -41,11 +59,7 @@ const EventGrid = () => {
     headers: { "Content-Type": "application/json" }
   });
   console.log(events);
-  return formatEvents(events).map(event => (
-    <Grid item sm={12} key={event.id} lg={4}>
-      <EventCard {...event} />
-    </Grid>
-  ));
+  return formatEvents(events).map(event => <EventCard {...event} />);
 };
 
 const FeaturedEvents = () => {
@@ -56,11 +70,13 @@ const FeaturedEvents = () => {
   return formatEvents(events).map(event => <FeaturedEventCard {...event} />);
 };
 
-const Events = () => {
+const EventList = () => {
   const classes = useStyles();
+  const [dialogVisibility, showDialog, hideDialog] = useToggler(false);
 
   return (
     <div className={classes.root}>
+      <CreateEventDialog open={dialogVisibility} onClose={hideDialog} />
       <AppBar position="static">
         <Toolbar>
           <Typography className={classes.title} variant="h6" noWrap>
@@ -68,22 +84,20 @@ const Events = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Grid container spacing={3} className={classes.gridContainer}>
-        <Grid item sm={12} md={9}>
-          <Grid container spacing={3} className={classes.gridContainer}>
-            <Suspense
-              fallback={
-                <CircularProgress
-                  size="40"
-                  className={classes.loadingIndicator}
-                />
-              }
-            >
-              <EventGrid />
-            </Suspense>
-          </Grid>
-        </Grid>
-        <Grid item sm={0} md={3}>
+      <div className={classes.grid}>
+        <div className={classes.eventGrid}>
+          <Suspense
+            fallback={
+              <CircularProgress
+                size="40"
+                className={classes.loadingIndicator}
+              />
+            }
+          >
+            <EventGrid />
+          </Suspense>
+        </div>
+        <div>
           <Typography variant="h6" className={classes.title}>
             Highlights
           </Typography>
@@ -92,13 +106,18 @@ const Events = () => {
               <FeaturedEvents />
             </Suspense>
           </List>
-        </Grid>
-      </Grid>
-      <Fab color="primary" aria-label="Add" className={classes.fab}>
+        </div>
+      </div>
+      <Fab
+        onClick={showDialog}
+        color="primary"
+        aria-label="Add"
+        className={classes.fab}
+      >
         <AddIcon />
       </Fab>
     </div>
   );
 };
 
-export default Events;
+export default EventList;
