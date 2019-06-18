@@ -24,6 +24,11 @@ const useStyles = makeStyles({
     fontWeight: "bold",
     color: "black",
     fontFamily: "Roboto"
+  },
+  description: {
+    height: "100px",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
   }
 });
 
@@ -67,7 +72,12 @@ const EventCard = ({ title, id, description, dates, eventImage }) => {
       />
       <CardMedia className={classes.media} image={eventImage} title={title} />
       <CardContent>
-        <Typography variant="body2" color="textSecondary" component="p">
+        <Typography
+          variant="body2"
+          color="textSecondary"
+          component="p"
+          className={classes.description}
+        >
           {description}
         </Typography>
       </CardContent>

@@ -14,7 +14,7 @@ import { backendUrl } from "../data/constants";
 import { useToggler } from "../helpers/hooks";
 import EventCard from "../components/EventCard";
 import FeaturedEventCard from "../components/FeaturedEventCard";
-import CreateEventDialog from "./CreateEventDialog";
+import CreateEventDialog from "../components/CreateEventDialog/CreateEventDialog";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -23,9 +23,6 @@ const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1
   },
-  loadingIndicator: {
-    flex: 1
-  },
   fab: {
     position: "fixed",
     right: 16,
@@ -33,7 +30,7 @@ const useStyles = makeStyles(theme => ({
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "3fr 1fr",
+    gridTemplateColumns: "1fr 3fr",
     gridGap: "16px",
     padding: 16,
     [theme.breakpoints.down("md")]: {
@@ -50,23 +47,23 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.only("sm")]: {
       gridTemplateColumns: "1fr 1fr"
     }
+  },
+  loading: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "300px"
   }
 }));
 
 const EventGrid = () => {
-  const { events } = useFetch(`${backendUrl}/events`, {
-    crossDomain: true,
-    headers: { "Content-Type": "application/json" }
-  });
-  console.log(events);
+  const { events } = useFetch(`${backendUrl}/events`);
   return formatEvents(events).map(event => <EventCard {...event} />);
 };
 
 const FeaturedEvents = () => {
-  const { events } = useFetch(`${backendUrl}/events/featured`, {
-    crossDomain: true,
-    headers: { "Content-Type": "application/json" }
-  });
+  const { events } = useFetch(`${backendUrl}/events/featured`);
   return formatEvents(events).map(event => <FeaturedEventCard {...event} />);
 };
 
@@ -84,38 +81,35 @@ const EventList = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <div className={classes.grid}>
-        <div className={classes.eventGrid}>
-          <Suspense
-            fallback={
-              <CircularProgress
-                size="40"
-                className={classes.loadingIndicator}
-              />
-            }
-          >
-            <EventGrid />
-          </Suspense>
-        </div>
-        <div>
-          <Typography variant="h6" className={classes.title}>
-            Highlights
-          </Typography>
-          <List>
-            <Suspense fallback={<CircularProgress size="40" />}>
-              <FeaturedEvents />
-            </Suspense>
-          </List>
-        </div>
-      </div>
-      <Fab
-        onClick={showDialog}
-        color="primary"
-        aria-label="Add"
-        className={classes.fab}
+      <Suspense
+        fallback={
+          <div className={classes.loading}>
+            <CircularProgress size={150} />
+          </div>
+        }
       >
-        <AddIcon />
-      </Fab>
+        <div className={classes.grid}>
+          <div>
+            <Typography variant="h6" className={classes.title}>
+              Highlights
+            </Typography>
+            <List>
+              <FeaturedEvents />
+            </List>
+          </div>
+          <div className={classes.eventGrid}>
+            <EventGrid />
+          </div>
+        </div>
+        <Fab
+          onClick={showDialog}
+          color="primary"
+          aria-label="Add"
+          className={classes.fab}
+        >
+          <AddIcon />
+        </Fab>
+      </Suspense>
     </div>
   );
 };

@@ -5,7 +5,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -19,8 +18,9 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { DateTimePicker } from "@material-ui/pickers";
 import withMobileDialog from "@material-ui/core/withMobileDialog";
 
-import placeholder from "../assets/images/image-placeholder.png";
-import { backendUrl } from "../data/constants";
+import placeholder from "../../assets/images/image-placeholder.png";
+import { createEventStore } from "./EventStore";
+import { backendUrl } from "../../data/constants";
 
 const useStyles = makeStyles(theme => ({
   content: {
@@ -37,7 +37,6 @@ const useStyles = makeStyles(theme => ({
       gridTemplateColumns: "1fr"
     }
   },
-  dateGrid: {},
   textGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
@@ -63,68 +62,17 @@ const useStyles = makeStyles(theme => ({
   table: {
     padding: "16px",
     height: "200"
+  },
+  image: {
+    width: "100%",
+    height: "200px"
   }
 }));
 
 const CreateEventDialog = ({ open, onClose, fullScreen }) => {
   const classes = useStyles();
 
-  const formData = useLocalStore(() => ({
-    title: "",
-    description: "",
-    image: "",
-    location: "",
-    dates: [],
-    date: dayjs(),
-    setTitle(value) {
-      this.title = value;
-    },
-    setDescription(value) {
-      this.description = value;
-    },
-    async setImage(value) {
-      const formData = new FormData();
-      formData.append("upload_preset", "c0vr7ift");
-      formData.append("file", value);
-
-      const { url } = await fetch(
-        "https://api.cloudinary.com/v1_1/dtdb5uhao/image/upload",
-        {
-          method: "POST",
-          body: formData
-        }
-      );
-      console.log(url);
-      this.image = url;
-    },
-    setLocation(value) {
-      this.location = value;
-    },
-    addDate(value) {
-      if (!this.dates.includes(this.date)) this.dates = [value, ...this.dates];
-    },
-    removeDate(index) {
-      this.dates.splice(index, 1);
-    },
-    get eventInformation() {
-      return {
-        title: this.title,
-        description: this.description,
-        eventImage: this.image,
-        dates: this.dates,
-        location: this.location
-      };
-    },
-    get isValid() {
-      return (
-        !!this.title &&
-        !!this.description &&
-        !!this.image &&
-        !!this.location &&
-        this.dates.length > 0
-      );
-    }
-  }));
+  const formData = useLocalStore(createEventStore);
 
   const createEvent = async () => {
     try {
@@ -140,6 +88,7 @@ const CreateEventDialog = ({ open, onClose, fullScreen }) => {
           }
         })
       });
+      formData.clearForm();
     } catch (e) {
       console.log(e);
     }
@@ -188,6 +137,13 @@ const CreateEventDialog = ({ open, onClose, fullScreen }) => {
                 label="Description"
                 variant="outlined"
               />
+              <div className={classes.imageContainer}>
+                <img
+                  className={classes.image}
+                  alt={formData.title}
+                  src={formData.image || placeholder}
+                />
+              </div>
               <input
                 accept="image/*"
                 className={classes.imageInput}
@@ -204,7 +160,6 @@ const CreateEventDialog = ({ open, onClose, fullScreen }) => {
                   Select
                 </Button>
               </label>
-              <img src={formData.image || placeholder} />
             </div>
           </div>
           <div>
@@ -237,7 +192,6 @@ const CreateEventDialog = ({ open, onClose, fullScreen }) => {
                       </TableCell>
                       <TableCell align="right">
                         <IconButton
-                          color="red"
                           aria-label="Remove date"
                           onClick={() => formData.removeDate(index)}
                         >
@@ -260,6 +214,7 @@ const CreateEventDialog = ({ open, onClose, fullScreen }) => {
           onClick={createEvent}
           disabled={!formData.isValid}
           color="primary"
+          variant="contained"
         >
           Create
         </Button>

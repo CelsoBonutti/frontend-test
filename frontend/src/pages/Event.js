@@ -10,6 +10,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
@@ -47,6 +48,13 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down("xs")]: {
       gridTemplateColumns: "1fr 1fr"
     }
+  },
+  loading: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "300px"
   }
 }));
 
@@ -120,7 +128,13 @@ const Event = ({ location, history }) => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Suspense fallback="Carregando">
+      <Suspense
+        fallback={
+          <div className={classes.loading}>
+            <CircularProgress size={150} />
+          </div>
+        }
+      >
         <EventDetails location={location} />
       </Suspense>
     </div>
