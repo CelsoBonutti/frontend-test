@@ -1,6 +1,5 @@
-import React, { Suspense } from "react";
+import React from "react";
 import dayjs from "dayjs";
-import useFetch from "fetch-suspense";
 import qs from "qs";
 import { makeStyles } from "@material-ui/core/styles";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -16,6 +15,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 
 import { backendUrl } from "../data/constants";
+import { useGET } from "../helpers/hooks";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,9 +61,19 @@ const useStyles = makeStyles(theme => ({
 const EventDetails = ({ location: { search } }) => {
   const classes = useStyles();
   const { id } = qs.parse(search, { ignoreQueryPrefix: true });
+  const [event, loading] = useGET(`${backendUrl}/events/${id}`);
+
+  if (loading) {
+    return (
+      <div className={classes.loading}>
+        <CircularProgress size={150} />
+      </div>
+    );
+  }
+
   const {
     event: { title, location, description, eventImage, dates }
-  } = useFetch(`${backendUrl}/events/${id}`);
+  } = event;
 
   return (
     <div className={classes.grid}>
@@ -71,7 +81,7 @@ const EventDetails = ({ location: { search } }) => {
         <Typography variant="h5" gutterBottom>
           {title}
           <Typography variant="h6" gutterBottom>
-            {location}
+            @{location}
           </Typography>
         </Typography>
         <Typography variant="body1" gutterBottom>
@@ -128,15 +138,7 @@ const Event = ({ location, history }) => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Suspense
-        fallback={
-          <div className={classes.loading}>
-            <CircularProgress size={150} />
-          </div>
-        }
-      >
-        <EventDetails location={location} />
-      </Suspense>
+      <EventDetails location={location} />
     </div>
   );
 };

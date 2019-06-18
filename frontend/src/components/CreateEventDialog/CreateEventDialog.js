@@ -69,7 +69,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const CreateEventDialog = ({ open, onClose, fullScreen }) => {
+const CreateEventDialog = ({ open, onClose, onEventCreated, fullScreen }) => {
   const classes = useStyles();
 
   const formData = useLocalStore(createEventStore);
@@ -89,6 +89,7 @@ const CreateEventDialog = ({ open, onClose, fullScreen }) => {
         })
       });
       formData.clearForm();
+      onEventCreated();
     } catch (e) {
       console.log(e);
     }
@@ -208,7 +209,7 @@ const CreateEventDialog = ({ open, onClose, fullScreen }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
-          Cancel
+          Close
         </Button>
         <Button
           onClick={createEvent}
