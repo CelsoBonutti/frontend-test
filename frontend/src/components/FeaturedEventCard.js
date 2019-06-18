@@ -6,16 +6,8 @@ import Avatar from "@material-ui/core/Avatar";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import Paper from "@material-ui/core/Paper";
 
-const FeaturedEventCard = ({
-  title,
-  description,
-  dates,
-  eventImage,
-  location,
-  id
-}) => {
+const FeaturedEventCard = ({ title, dates, eventImage, location, id }) => {
   return (
     <Link
       component={RouterLink}
@@ -27,7 +19,7 @@ const FeaturedEventCard = ({
         </ListItemAvatar>
         <ListItemText
           primary={title}
-          secondary={dayjs(dates).format("MMM Do, HH:mm")}
+          secondary={`@${location} - ${dayjs(dates).format("MMM Do, HH:mm")}`}
         />
       </ListItem>
     </Link>
